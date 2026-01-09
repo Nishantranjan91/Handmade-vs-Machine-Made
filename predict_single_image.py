@@ -6,7 +6,7 @@ from tensorflow.keras.preprocessing import image
 model = tf.keras.models.load_model("handmade_vs_machine_model.h5")
 
 # Image path (change name if needed)
-img_path = "test_image.jpg"
+img_path = "test.jpg"
 
 # Load & preprocess image
 img = image.load_img(img_path, target_size=(224, 224))

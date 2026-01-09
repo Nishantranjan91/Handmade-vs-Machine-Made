@@ -1,36 +1,30 @@
-import tensorflow as tf
-import numpy as np
 import os
+import numpy as np
+from tensorflow.keras.models import load_model
 from tensorflow.keras.preprocessing import image
 
 # Load trained model
-model = tf.keras.models.load_model("handmade_vs_machine_model.h5")
+model = load_model("mobilenetv2_handmade_vs_machine.h5")
 
-# Image size (same as training)
-IMG_SIZE = (224, 224)
+# Folder containing test images
+test_folder = "test_images"
 
-# Class names (same order as training)
-class_names = ["Handmade", "Machine_made"]
+IMG_SIZE = 224
 
-# Images list
-images = [
-    "test1.jpg",
-    "test2.jpg",
-    "test3.jpg"
-]
+print("🔍 Predicting images from folder:", test_folder)
+print("-" * 40)
 
-print("\n🔍 Running predictions on multiple images:\n")
+for img_name in os.listdir(test_folder):
+    img_path = os.path.join(test_folder, img_name)
 
-for img_name in images:
-    if not os.path.exists(img_name):
-        print(f"❌ {img_name} not found")
-        continue
+    if img_name.lower().endswith((".jpg", ".jpeg", ".png")):
+        img = image.load_img(img_path, target_size=(IMG_SIZE, IMG_SIZE))
+        img_array = image.img_to_array(img)
+        img_array = img_array / 255.0
+        img_array = np.expand_dims(img_array, axis=0)
 
-    img = image.load_img(img_name, target_size=IMG_SIZE)
-    img_array = image.img_to_array(img)
-    img_array = np.expand_dims(img_array, axis=0) / 255.0
+        prediction = model.predict(img_array)[0][0]
 
-    prediction = model.predict(img_array, verbose=0)
-    predicted_class = class_names[np.argmax(prediction)]
+        label = "Machine-made" if prediction > 0.5 else "Handmade"
 
-    print(f"🖼️ {img_name} → ✅ {predicted_class}")
+        print(f"{img_name:25} → {label}")
